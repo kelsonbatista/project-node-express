@@ -8,9 +8,15 @@ app.use(bodyParser.json());
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 
-app.get('/talker', async (req, res) => {
+const getTalkers = async () => {
   const talkers = await fs.readFile('./talker.json', 'utf-8')
-  .then((response) => JSON.parse(response));
+    .then((content) => JSON.parse(content));
+  return talkers;
+};
+
+app.get('/talker', async (_req, res) => {
+  const talkers = await getTalkers();
+  console.log(talkers);
   return res.status(200).json(talkers);
 });
 
