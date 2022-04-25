@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs').promises;
+const crypto = require('crypto');
 
 const app = express();
 app.use(bodyParser.json());
@@ -12,6 +13,10 @@ const getTalkers = async () => {
   const talkers = await fs.readFile('./talker.json', 'utf-8')
     .then((content) => JSON.parse(content));
   return talkers;
+};
+
+const generateToken = () => {
+  return crypto.randomBytes(8).toString('hex');
 };
 
 app.get('/talker', async (_req, res) => {
@@ -30,6 +35,13 @@ app.get('/talker/:id', async (req, res) => {
   } catch (err) {
     return res.status(500).json({ message: `Error found: ${err}` });
   }
+});
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const token = generateToken();
+  if (!(email && password)) return res.status(401).json({ message: 'Not authorized!' });
+  return res.status(200).json({ token });
 });
 
 // não remova esse endpoint, e para o avaliador funcionar
