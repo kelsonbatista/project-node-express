@@ -19,6 +19,25 @@ const generateToken = () => {
   return crypto.randomBytes(8).toString('hex');
 };
 
+const validateLogin = (req, res, next) => {
+  const { email, password } = req.body;
+  if (!(email)) return res.status(400).json({ message: 'O campo "email" é obrigatório' });
+  const regexEmail = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})$/;
+  const validateEmail = regexEmail.test(email);
+  if (!validateEmail) {
+    return res.status(400)
+    .json({ message: 'O "email" deve ter o formato "email@email.com"' });
+  }
+
+  if (!password) return res.status(400).json({ message: 'O campo "password" é obrigatório' }); 
+  const validatePassword = (password.toString()).length > 5;
+  if (!validatePassword) {
+    return res.status(400)
+    .json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
+  }
+  next();
+};
+
 app.get('/talker', async (_req, res) => {
   const talkers = await getTalkers();
   console.log(talkers);
@@ -37,10 +56,8 @@ app.get('/talker/:id', async (req, res) => {
   }
 });
 
-app.post('/login', (req, res) => {
-  const { email, password } = req.body;
+app.post('/login', validateLogin, (req, res) => {
   const token = generateToken();
-  if (!(email && password)) return res.status(401).json({ message: 'Not authorized!' });
   return res.status(200).json({ token });
 });
 
