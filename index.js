@@ -170,7 +170,7 @@ app.put(
   async (req, res) => {
     const { id } = req.params;
     const newTalker = req.body;
-    Object.assign(newTalker, { id });
+    Object.assign(newTalker, { id: Number(id) });
     const talkers = await getTalkers();
     const filterTalker = talkers.filter((talker) => talker.id !== Number(id));
     filterTalker.push(newTalker);
