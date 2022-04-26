@@ -85,7 +85,8 @@ const validateDate = (req, res, next) => {
 
 const validateRate = (req, res, next) => {
   const { talk: { rate } } = req.body;
-  if (!(Number.isInteger(rate) && rate >= 1 && rate <= 5)) {
+  console.log(rate, 'rate');
+  if (!Number.isInteger(rate) || !(rate >= 1 && rate <= 5) || rate === 0) {
     return res.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
   }
   next();
@@ -93,7 +94,14 @@ const validateRate = (req, res, next) => {
 
 const validateTalk = (req, res, next) => {
   const { talk } = req.body;
-  if (!talk || !talk.watchedAt || !talk.rate) {
+  if (!talk) {
+    return res.status(500)
+    .json({ message: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios' });
+  }
+  if (talk.rate === 0) {
+    return res.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+  }
+  if (!talk.watchedAt || !talk.rate) {
     return res.status(400)
     .json({ message: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios' });
   }
@@ -126,18 +134,38 @@ app.post('/login', validateLogin, (req, res) => {
 app.post(
   '/talker',
   validateToken,
-  validateAge,
   validateName,
+  validateAge,
   validateTalk,
   validateDate,
   validateRate,
   async (req, res) => {
-  const newTalker = req.body;
-  Object.assign(newTalker, { id: 5 });
-  const talkers = await getTalkers();
-  talkers.push(newTalker);
-  await setTalkers(talkers);
-  return res.status(201).json(newTalker);
+    const newTalker = req.body;
+    Object.assign(newTalker, { id: 5 });
+    const talkers = await getTalkers();
+    talkers.push(newTalker);
+    await setTalkers(talkers);
+    return res.status(201).json(newTalker);
+  },
+);
+
+app.put(
+  '/talker/:id',
+  validateToken,
+  validateName,
+  validateAge,
+  validateTalk,
+  validateDate,
+  validateRate,
+  async (req, res) => {
+    const { id } = req.params;
+    const newTalker = req.body;
+    Object.assign(newTalker, { id });
+    const talkers = await getTalkers();
+    const filterTalker = talkers.filter((talker) => talker.id !== Number(id));
+    filterTalker.push(newTalker);
+    await setTalkers(filterTalker);
+    return res.status(200).json(newTalker);
   },
 );
 
