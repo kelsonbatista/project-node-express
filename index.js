@@ -85,7 +85,7 @@ const validateDate = (req, res, next) => {
 
 const validateRate = (req, res, next) => {
   const { talk: { rate } } = req.body;
-  console.log(rate, 'rate');
+  // console.log(rate, 'rate');
   if (!Number.isInteger(rate) || !(rate >= 1 && rate <= 5) || rate === 0) {
     return res.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
   }
@@ -110,8 +110,18 @@ const validateTalk = (req, res, next) => {
 
 app.get('/talker', async (_req, res) => {
   const talkers = await getTalkers();
-  console.log(talkers);
+  // console.log(talkers);
   return res.status(200).json(talkers);
+});
+
+app.get('/talker/search', validateToken, async (req, res) => {
+  const talkers = await getTalkers();
+  const { q } = req.query;
+  if (!q) return res.status(200).json(talkers);
+  const filterTalker = talkers
+    .filter(({ name }) => name.toLowerCase().includes(q.toLowerCase()));
+  if (!filterTalker) return res.status(200).json(talkers);
+  return res.status(200).json(filterTalker);
 });
 
 app.get('/talker/:id', async (req, res) => {
@@ -169,17 +179,13 @@ app.put(
   },
 );
 
-app.delete(
-  '/talker/:id',
-  validateToken,
-  async (req, res) => {
+app.delete('/talker/:id', validateToken, async (req, res) => {
     const { id } = req.params;
     const talkers = await getTalkers();
     const filterTalker = talkers.filter((talker) => talker.id !== Number(id));
     await setTalkers(filterTalker);
     return res.status(204).json(filterTalker);
-  },
-);
+});
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
