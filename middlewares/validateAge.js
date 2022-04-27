@@ -1,11 +1,12 @@
 const sc = require('../utils/statusCode');
+const md = require('../utils/messageDictionary');
 
 const validateAge = (req, res, next) => {
   const { age } = req.body;
-  if (!age) return res.status(sc.BAD_REQUEST).json({ message: 'O campo "age" é obrigatório' });
+  if (!age) return res.status(sc.BAD_REQUEST).json({ message: md.REQUIRED_AGE });
   if (!(Number.isInteger(age) && age >= 18)) {
     return res.status(sc.BAD_REQUEST)
-      .json({ message: 'A pessoa palestrante deve ser maior de idade' });
+      .json({ message: md.FORMAT_AGE });
   }
   next();
 };

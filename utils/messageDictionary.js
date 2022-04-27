@@ -1,0 +1,17 @@
+module.exports = {
+  FORMAT_AGE: 'A pessoa palestrante deve ser maior de idade',
+  FORMAT_DATE: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"',
+  FORMAT_EMAIL: 'O "email" deve ter o formato "email@email.com"',
+  FORMAT_NAME: 'O "name" deve ter pelo menos 3 caracteres',
+  FORMAT_PASSWORD: 'O "password" deve ter pelo menos 6 caracteres',
+  FORMAT_RATE: 'O campo "rate" deve ser um inteiro de 1 à 5',
+  INTERNAL_SERVER_ERROR: 'Error 500 - Internal Server Error',
+  REQUIRED_AGE: 'O campo "age" é obrigatório',
+  REQUIRED_EMAIL: 'O campo "email" é obrigatório',
+  REQUIRED_NAME: 'O campo "name" é obrigatório',
+  REQUIRED_PASSWORD: 'O campo "password" é obrigatório',
+  REQUIRED_TALK: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios',
+  TALKER_NOT_FOUND: 'Pessoa palestrante não encontrada',
+  TOKEN_FOUND: 'Token não encontrado',
+  TOKEN_INVALID: 'Token inválido',
+};

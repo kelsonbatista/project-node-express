@@ -1,18 +1,19 @@
 const sc = require('../utils/statusCode');
+const md = require('../utils/messageDictionary');
 
 const validateTalk = (req, res, next) => {
   const { talk } = req.body;
   if (!talk) {
     return res.status(sc.BAD_REQUEST)
-    .json({ message: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios' });
+    .json({ message: md.REQUIRED_TALK });
   }
   if (talk.rate === 0) {
     return res.status(sc.BAD_REQUEST)
-    .json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+    .json({ message: md.FORMAT_RATE });
   }
   if (!talk.watchedAt || !talk.rate) {
     return res.status(sc.BAD_REQUEST)
-    .json({ message: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios' });
+    .json({ message: md.REQUIRED_TALK });
   }
   next();
 };

@@ -1,9 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs').promises;
-const crypto = require('crypto');
 const sc = require('./utils/statusCode');
 const mw = require('./middlewares');
+const errorConstructor = require('./utils/errorConstructor');
+const md = require('./utils/messageDictionary');
 
 const app = express();
 app.use(bodyParser.json());
@@ -13,11 +14,6 @@ const PORT = '3000';
 const setTalkers = (content) => {
   const talkers = fs.writeFile('./talker.json', JSON.stringify(content));
   return talkers;
-};
-
-const generateToken = () => {
-  const token = crypto.randomBytes(8).toString('hex');
-  return token;
 };
 
 app.get('/talker', mw.getTalkers, (req, res, next) => {
@@ -35,7 +31,7 @@ app.get('/talker/search?', mw.validateToken, mw.getTalkers, (req, res, next) => 
     if (!q) return res.status(sc.OK_STATUS).json(talkers);
     const filterTalker = talkers
       .filter(({ name }) => name.toLowerCase().includes(q.toLowerCase()));
-    if (!filterTalker) return res.status(200).json(talkers);
+    if (!filterTalker) return res.status(sc.OK_STATUS).json(talkers);
     return res.status(sc.OK_STATUS).json(filterTalker);
   } catch (err) {
     next(err);
@@ -46,16 +42,19 @@ app.get('/talker/:id', mw.getTalkers, (req, res, next) => {
   try {
     const { talkers, params: { id } } = req;
     const talkerId = talkers.find((talker) => talker.id === Number(id));
-    if (!talkerId) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+    if (!talkerId) {
+      next(errorConstructor(sc.NOT_FOUND, md.TALKER_NOT_FOUND));
+    }
     return res.status(sc.OK_STATUS).json(talkerId);
   } catch (err) {
     next(err);
   }
 });
 
-app.post('/login', mw.validateEmail, mw.validatePassword, (_req, res, next) => {
+app.post('/login', mw.validateEmail, mw.validatePassword, mw.generateToken, (req, res, next) => {
   try {
-    const token = generateToken();
+    const { token } = req;
+    console.log(token, 'token');
     return res.status(sc.OK_STATUS).json({ token });
   } catch (err) {
     next(err);

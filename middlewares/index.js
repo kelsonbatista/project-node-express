@@ -8,6 +8,7 @@ const validateAge = require('./validateAge');
 const validateDate = require('./validateDate');
 const validateRate = require('./validateRate');
 const validateTalk = require('./validateTalk');
+const generateToken = require('./generateToken');
 
 module.exports = {
   getTalkers,
@@ -20,4 +21,5 @@ module.exports = {
   validateDate,
   validateRate,
   validateTalk,
+  generateToken,
 };
