@@ -20,18 +20,16 @@ const generateToken = () => {
   return token;
 };
 
-app.get('/talker', mw.getTalkers, (req, res) => {
+app.get('/talker', mw.getTalkers, (req, res, next) => {
   try {
-    console.log(mw.getTalkers, 'get');
     const { talkers } = req;
     return res.status(sc.OK_STATUS).json(talkers);
-  } catch (error) {
-    return res.status(sc.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error 500 - Internal Server Error' });
+  } catch (err) {
+    next(err);
   }
 });
 
-app.get('/talker/search?', mw.validateToken, mw.getTalkers, (req, res) => {
+app.get('/talker/search?', mw.validateToken, mw.getTalkers, (req, res, next) => {
   try {
     const { talkers, query: { q } } = req;
     if (!q) return res.status(sc.OK_STATUS).json(talkers);
@@ -39,27 +37,29 @@ app.get('/talker/search?', mw.validateToken, mw.getTalkers, (req, res) => {
       .filter(({ name }) => name.toLowerCase().includes(q.toLowerCase()));
     if (!filterTalker) return res.status(200).json(talkers);
     return res.status(sc.OK_STATUS).json(filterTalker);
-  } catch (error) {
-    return res.status(sc.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error 500 - Internal Server Error' });
+  } catch (err) {
+    next(err);
   }
 });
 
-app.get('/talker/:id', mw.getTalkers, (req, res) => {
+app.get('/talker/:id', mw.getTalkers, (req, res, next) => {
   try {
     const { talkers, params: { id } } = req;
     const talkerId = talkers.find((talker) => talker.id === Number(id));
     if (!talkerId) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
     return res.status(sc.OK_STATUS).json(talkerId);
-  } catch (error) {
-    return res.status(sc.INTERNAL_SERVER_ERROR)
-      .json({ message: 'Error 500 - Internal Server Error' });
+  } catch (err) {
+    next(err);
   }
 });
 
-app.post('/login', mw.validateEmail, mw.validatePassword, (_req, res) => {
-  const token = generateToken();
-  return res.status(sc.OK_STATUS).json({ token });
+app.post('/login', mw.validateEmail, mw.validatePassword, (_req, res, next) => {
+  try {
+    const token = generateToken();
+    return res.status(sc.OK_STATUS).json({ token });
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post(
@@ -71,13 +71,17 @@ app.post(
   mw.validateDate,
   mw.validateRate,
   mw.getTalkers,
-  async (req, res) => {
-    const { talkers } = req;
-    const newTalker = req.body;
-    Object.assign(newTalker, { id: 5 });
-    talkers.push(newTalker);
-    await setTalkers(talkers);
-    return res.status(sc.CREATED).json(newTalker);
+  async (req, res, next) => {
+    try {
+      const { talkers } = req;
+      const newTalker = req.body;
+      Object.assign(newTalker, { id: 5 });
+      talkers.push(newTalker);
+      await setTalkers(talkers);
+      return res.status(sc.CREATED).json(newTalker);
+    } catch (err) {
+      next(err);
+    }
   },
 );
 
@@ -90,27 +94,30 @@ app.put(
   mw.validateDate,
   mw.validateRate,
   mw.getTalkers,
-  async (req, res) => {
-    const { talkers, params: { id }} = req;
-    const newTalker = req.body;
-    Object.assign(newTalker, { id: Number(id) });
-    const filterTalker = talkers.filter((talker) => talker.id !== Number(id));
-    filterTalker.push(newTalker);
-    await setTalkers(filterTalker);
-    return res.status(sc.OK_STATUS).json(newTalker);
+  async (req, res, next) => {
+    try {
+      const { talkers, params: { id } } = req;
+      const newTalker = req.body;
+      Object.assign(newTalker, { id: Number(id) });
+      const filterTalker = talkers.filter((talker) => talker.id !== Number(id));
+      filterTalker.push(newTalker);
+      await setTalkers(filterTalker);
+      return res.status(sc.OK_STATUS).json(newTalker);
+    } catch (err) {
+      next(err);
+    }
   },
 );
 
-app.delete('/talker/:id', mw.validateToken, mw.getTalkers, async (req, res) => {
+app.delete('/talker/:id', mw.validateToken, mw.getTalkers, async (req, res, next) => {
     try {
       const { talkers, params: { id } } = req;
       console.log(talkers);
       const filterTalker = talkers.filter((talker) => talker.id !== Number(id));
       await setTalkers(filterTalker);
       return res.status(sc.NO_CONTENT).json(filterTalker);
-    } catch (error) {
-      return res.status(sc.INTERNAL_SERVER_ERROR)
-        .json({ message: `${error}` });
+    } catch (err) {
+      next(err);
     }
 });
 
