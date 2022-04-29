@@ -54,7 +54,7 @@ app.get('/talker/:id', mw.getTalkers, (req, res, next) => {
 app.post('/login', mw.validateEmail, mw.validatePassword, mw.generateToken, (req, res, next) => {
   try {
     const { token } = req;
-    console.log(token, 'token');
+    // console.log(token, 'token');
     return res.status(sc.OK_STATUS).json({ token });
   } catch (err) {
     next(err);
@@ -111,7 +111,7 @@ app.put(
 app.delete('/talker/:id', mw.validateToken, mw.getTalkers, async (req, res, next) => {
     try {
       const { talkers, params: { id } } = req;
-      console.log(talkers);
+      // console.log(talkers);
       const filterTalker = talkers.filter((talker) => talker.id !== Number(id));
       await setTalkers(filterTalker);
       return res.status(sc.NO_CONTENT).json(filterTalker);
